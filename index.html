@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoInvest Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 p-4">
+    <div class="max-w-md mx-auto">
+        <header class="mb-6">
+            <h1 class="text-2xl font-bold text-sky-400">🌐 GeoInvest Pro</h1>
+            <p class="text-xs text-slate-500">Inteligência: InfoMoney, Economist & Global</p>
+            <button onclick="carregar()" class="mt-4 w-full bg-sky-600 py-3 rounded-xl font-bold active:bg-sky-700">Atualizar Inteligência</button>
+        </header>
+
+        <div id="feed" class="space-y-4">
+            <p class="text-center text-slate-500 py-10">Toque em atualizar para sincronizar fontes...</p>
+        </div>
+    </div>
+
+    <script>
+        async function carregar() {
+            const feed = document.getElementById('feed');
+            feed.innerHTML = "Sincronizando fontes de elite...";
+            
+            // Usamos o RSS do G1 Economia e InfoMoney que são as pontes para esses conteúdos no Brasil
+            const fontes = [
+                "https://www.infomoney.com.br/mercados/feed/",
+                "https://g1.globo.com/rss/g1/economia/"
+            ];
+
+            let html = "";
+            for (let url of fontes) {
+                try {
+                    const res = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(url));
+                    const data = await res.json();
+                    const xml = new DOMParser().parseFromString(data.contents, "text/xml");
+                    const items = xml.querySelectorAll("item");
+                    
+                    items.forEach((item, i) => {
+                        if(i < 3) {
+                            html += `
+                                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+                                    <h3 class="font-bold text-sm text-slate-100">${item.querySelector("title").textContent}</h3>
+                                    <a href="${item.querySelector("link").textContent}" target="_blank" class="text-sky-400 text-xs font-semibold mt-2 block">Acessar Fonte →</a>
+                                </div>`;
+                        }
+                    });
+                } catch(e) { continue; }
+            }
+            feed.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
